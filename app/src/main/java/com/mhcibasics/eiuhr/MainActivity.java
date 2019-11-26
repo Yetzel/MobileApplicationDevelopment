@@ -1,18 +1,24 @@
 package com.mhcibasics.eiuhr;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -22,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     Context ctx = null;
     private ListView lvTimers;
+    private CountdownAdapter ctAdapter;
     private List<Countdown> lstTimers;
 
     @Override
@@ -32,36 +39,71 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        lstTimers = new ArrayList<>();
 
         lvTimers = (ListView) findViewById(R.id.lvItems);
-        lstTimers = new ArrayList<>();
-        lstTimers.add(new Countdown("A", System.currentTimeMillis() + 10000));
-        lstTimers.add(new Countdown("B", System.currentTimeMillis() + 20000));
-        lstTimers.add(new Countdown("C", System.currentTimeMillis() + 20000));
-        lstTimers.add(new Countdown("D", System.currentTimeMillis() + 20000));
-        lstTimers.add(new Countdown("E", System.currentTimeMillis() + 20000));
-        lstTimers.add(new Countdown("F", System.currentTimeMillis() + 20000));
-        lstTimers.add(new Countdown("G", System.currentTimeMillis() + 30000));
-        lstTimers.add(new Countdown("H", System.currentTimeMillis() + 20000));
-        lstTimers.add(new Countdown("I", System.currentTimeMillis() + 20000));
-        lstTimers.add(new Countdown("J", System.currentTimeMillis() + 40000));
-        lstTimers.add(new Countdown("K", System.currentTimeMillis() + 20000));
-        lstTimers.add(new Countdown("L", System.currentTimeMillis() + 50000));
-        lstTimers.add(new Countdown("M", System.currentTimeMillis() + 60000));
-        lstTimers.add(new Countdown("N", System.currentTimeMillis() + 20000));
-        lstTimers.add(new Countdown("O", System.currentTimeMillis() + 10000));
+        lvTimers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Countdown c = ctAdapter.getItem(position);
+                lstTimers.remove(position);
 
-        lvTimers.setAdapter(new CountdownAdapter(MainActivity.this, lstTimers));
+                Intent intent = new Intent(ctx, AddTimerActivity.class);
+                intent.putExtra("CD", c);
+                startActivityForResult(intent, 1);
+                ctAdapter.notifyDataSetChanged();
+            }
+        });
+        lvTimers.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
+
+                dialogBuilder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        lstTimers.remove(position);
+                        ctAdapter.notifyDataSetChanged();
+                    }
+                });
+
+                dialogBuilder.setNegativeButton("Pause", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //TODO add Pause
+                    }
+                });
+
+                AlertDialog aDialog = dialogBuilder.create();
+                aDialog.show();
+                aDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLUE);
+
+                return true;
+            }
+        });
+        ctAdapter = new CountdownAdapter(MainActivity.this, lstTimers);
+        lvTimers.setAdapter(ctAdapter);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        //fab.setImageResource(R.drawable.ic_add_timer);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ctx, AddTimerActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, 1);
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+            Countdown c = (Countdown) data.getExtras().getSerializable("newTimer");
+            lstTimers.add(c);
+            ctAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override

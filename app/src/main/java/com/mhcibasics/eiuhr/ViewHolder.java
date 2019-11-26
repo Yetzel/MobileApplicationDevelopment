@@ -1,18 +1,31 @@
 package com.mhcibasics.eiuhr;
 
+import android.content.Context;
+import android.content.Intent;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ViewHolder {
+import androidx.recyclerview.widget.RecyclerView;
+
+public class ViewHolder extends RecyclerView.ViewHolder {
     TextView tvProduct;
     TextView tvTimeRemaining;
     Countdown countdown;
     ImageView ivPicture;
+    Context ctx;
+
+    public ViewHolder(View convertView) {
+        super(convertView);
+        ctx = convertView.getContext();
+    }
 
     public void setData(Countdown item) {
         countdown = item;
         tvProduct.setText(item.name);
+        ivPicture.setImageURI(item.getUriPicture());
         updateTimeRemaining(System.currentTimeMillis());
+
     }
 
     public void updateTimeRemaining(long currentTime) {
@@ -23,7 +36,13 @@ public class ViewHolder {
             int hours = (int) ((timeDiff / (1000 * 60 * 60)) % 24);
             tvTimeRemaining.setText(hours + " hrs " + minutes + " mins " + seconds + " sec");
         } else {
-            tvTimeRemaining.setText("Expired!!");
+            if(!countdown.isFinished()){
+                tvTimeRemaining.setText("Time over");
+                Intent intent = new Intent(ctx, TimerOverActivity.class);
+                intent.putExtra("CD", countdown);
+                ctx.startActivity(intent);
+                countdown.setFinished(true);
+            }
         }
     }
 }
