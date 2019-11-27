@@ -14,6 +14,7 @@ public class Countdown implements Serializable {
     private String uriPicture;
     private String uriRingtone;
     private boolean isFinished = false;
+    Bitmap test;
 
     public Countdown(String name, long expirationTime, Uri image, Uri ringTone) {
         this.name = name;

@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -169,13 +170,11 @@ public class AddTimerActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            if (requestCode == 1 || requestCode == 2) {
+            if (requestCode == 1) {
                 uriPicture = data.getData();
                 ivPicture.setImageURI(uriPicture);
-                btnChoosePicture.setVisibility(View.GONE);
 
                 pictureSet = true;
-                checkForButtonActivation();
             } else if (requestCode == 5) {
                 Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
 
@@ -187,12 +186,16 @@ public class AddTimerActivity extends AppCompatActivity {
                     tvSound.setText(title);
 
                     ringtoneSet = true;
-                    checkForButtonActivation();
                 } else {
                     this.uriRingtone = null;
                 }
+            } else if (requestCode == 2) {
+                Bitmap bmp = (Bitmap) data.getExtras().get("data");
+                ivPicture.setImageBitmap(bmp);
+                pictureSet = true;
             }
         }
+        checkForButtonActivation();
     }
 
     private void checkForButtonActivation() {
