@@ -4,8 +4,11 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -127,24 +130,46 @@ public class AddTimerActivity extends AppCompatActivity {
 
     //to pick a picture
     public void btnActionChoosePicture(View view) {
-        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        getIntent.setType("image/*");
 
-        Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        pickIntent.setType("image/*");
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(AddTimerActivity.this);
 
-        Intent chooseIntent = Intent.createChooser(getIntent, "Select Image");
-        chooseIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
+        dialogBuilder.setPositiveButton("Gallery", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                getIntent.setType("image/*");
 
-        startActivityForResult(chooseIntent, 1);
+                Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                pickIntent.setType("image/*");
+
+                Intent chooseIntent = Intent.createChooser(getIntent, "Select Image");
+                chooseIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
+
+                startActivityForResult(chooseIntent, 1);
+            }
+        });
+
+        dialogBuilder.setNegativeButton("Camera", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(takePicture, 2);
+
+            }
+        });
+
+        AlertDialog aDialog = dialogBuilder.create();
+        aDialog.show();
+        aDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLUE);
+
+
+
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        System.out.println("ActivityResult: \nrequestCode = " + requestCode + "\nresultCode = " + resultCode + "\ndata = " + data);
         if (resultCode == RESULT_OK) {
-            if (requestCode == 1) {
+            if (requestCode == 1 || requestCode == 2) {
                 uriPicture = data.getData();
                 ivPicture.setImageURI(uriPicture);
                 btnChoosePicture.setVisibility(View.GONE);

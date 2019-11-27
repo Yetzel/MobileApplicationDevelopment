@@ -77,6 +77,4 @@ public class TimerOverActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    //TODO Timer pause / optional
-    //TODO snap picture
 }
